@@ -1,0 +1,25 @@
+[*] Test: destroy a NULL Queue.
+[error]: Source: glxstack:destroyQueue Message: An attempt was made to destroy an empty Queue.
+[+] Ok.
+[*] Test Name: peek a NULL Queue.
+[error]: Source: glxstack:peek Message: An attempt was made to peek() an empty Queue.
+[+] Ok.
+[*] Test: destroy a Queue with 1 element.
+[+] Ok.
+[*] Test Name: try to destroy the Queue again.
+[error]: Source: glxstack:destroyQueue Message: An attempt was made to destroy an empty Queue.
+[+] Ok.
+[*] Test: Enqueue [0, 9] integers.
+[+] Ok.
+[*] Test: retrieve size of Queue.
+[+] Ok.
+[*] Test: peek the Queue.
+[+] Ok.
+[*] Test: dequeue all integers.
+[+] Ok.
+[*] Test: Dequeue an empty Queue.
+[+] Ok.
+[*] Test: Peek an empty Queue.
+[error]: Source: glxstack:peek Message: An attempt was made to peek() an empty Queue.
+[+] Ok.
+[*] Unit test for glxqueue is done!

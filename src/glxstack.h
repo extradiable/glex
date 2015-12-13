@@ -13,6 +13,7 @@
 #include <stdint.h>
 #include <stdlib.h>
 #include <stdio.h>
+#include "glxerrors.h"
 
 /* The following structures are used to represent a basic stack */
 

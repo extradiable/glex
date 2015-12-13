@@ -12,6 +12,7 @@
 #include <stdint.h>
 #include <stdlib.h>
 #include <stdio.h>
+#include "glxerrors.h"
 
 struct RBT {
   int8_t color;

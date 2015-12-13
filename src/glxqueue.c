@@ -9,15 +9,6 @@
 
 #include "glxqueue.h"
 
-void error(char *fn, char *msg);
-
-void error(char *fn, char *msg){
-  fprintf(stderr, "[error]: Source: glxqueue:%s Message: %s.\n", fn, msg);
-  #ifndef DEBUG_H
-  exit(EXIT_FAILURE);
-  #endif
-}
-
 static Queue *createQueue() {
   Queue *Q = (Queue *) malloc(sizeof(Queue *));
   if (Q) {
@@ -25,7 +16,7 @@ static Queue *createQueue() {
     Q->last = NULL;
     Q->size = 0;
   } else {
-      error("createQueue", "Unable to create Queue");
+      error("glxqueue", "createQueue", "Unable to create Queue");
   }
   return Q;
 }
@@ -36,7 +27,7 @@ static Item *createItem(void *data) {
     I->data = data;
     I->next = NULL;
   } else {
-      error("createItem", "Unable to create Item");
+      error("glxqueue", "createItem", "Unable to create Item");
   }
   return I;
 }
@@ -68,7 +59,7 @@ static void *peek(Queue *Q) {
   if (Q != NULL && Q->size) {
     return Q->first->data;
   } else {
-   error("peek", "An attempt was made to peek() an empty Queue");
+   error("glxqueue", "peek", "An attempt was made to peek() an empty Queue");
   }
   return NULL;
 }
@@ -85,7 +76,7 @@ static void destroy(Queue **pQ, void (* destroyfn) (void *data)) {
     free(Q);
     *pQ = NULL;
   } else {
-    error("destroyQueue", "An attempt was made to destroy an empty Queue");
+    error("glxqueue", "destroyQueue", "An attempt was made to destroy an empty Queue");
   }
 }
 

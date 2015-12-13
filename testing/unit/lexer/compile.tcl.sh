@@ -1,13 +1,10 @@
-#!/bin/bash
+#!/usr/bin/tclsh
 
-clear
-gcc -g -o glex      \
-  glex.c            \
-  glxparsetree.c    \
-  glxreader.c	    \
-  glxrbtree.c	    \
-  glxstate.c        \
-  glxptnode.c	    \
-  glxstack.c        \
-2> compilation.log
-cat compilation.log	
+exec rm -f lexer.exe
+exec rm -f compilation.log
+exec \
+  gcc -g -DDEBUG_H -o lexer.exe \
+  ../../../src/glxlexer.h \
+  ../../../src/glxlexer.c \
+  test_glxlexer.c \
+  > compilation.log

@@ -23,31 +23,6 @@
 
 static RBT sentinel;
 
-/** This function was added to maintain a circular list of pointers between nodes */
-// void fix_linked_list(RBNode **T, RBNode *z);
-// 
-// void insert_fixup(RBNode **T, RBNode *z);
-// 
-// void *left_rotate(RBNode **T, RBNode *x);
-// 
-// void *right_rotate(RBNode **T, RBNode *y);
-// 
-// void error(char *fn, char *msg);
-
-void error(char *fn, char *msg){
-  fprintf(
-    #ifndef DEBUG_H
-    stderr,
-    #else
-    stdout, 
-    #endif
-    "[error]: Source: glxstack:%s Message: %s.\n", fn, msg
-  );
-  #ifndef DEBUG_H
-  exit(EXIT_FAILURE);
-  #endif
-}
-
 static int isEmpty(RBT *T){
   if (T != NULL) {
     return T == &sentinel;
@@ -69,8 +44,7 @@ static RBT *createNode(uint16_t key, void *data){
     N->left = N->right = create();
     N->next = N->prev = N;
   }else{
-    fprintf(stderr, "Insufficient memory to create R.B. Node.");
-    exit(EXIT_FAILURE);
+    error("glxrbtree", "createNode", "Insufficient memory to create R.B. Node");
   }
   return N;
 }
@@ -204,7 +178,7 @@ static void join(RBT **T, RBT *F){
       } while(N != F);
     }
   } else {
-    error("join", "An attempt was made to use NULL RBT");
+    error("glxrbtree", "join", "An attempt was made to use NULL RBT");
   }
 }
 
@@ -221,7 +195,7 @@ static void dump(RBT *T, FILE *fp) {
       dump(T->right, fp);
     } 
   } else {
-    error("dump", "An attempt was made to write in a NULL file pointer");
+    error("glxrbtree", "dump", "An attempt was made to write in a NULL file pointer");
   }
 }
 
@@ -238,7 +212,7 @@ static char containsKey(RBT *T, uint16_t key){
     }
     return 0;
   } else {
-    error("containsKey", "An attempt was made to search in a NULL RBT");
+    error("glxrbtree", "containsKey", "An attempt was made to search in a NULL RBT");
   }
 }
 
@@ -254,7 +228,7 @@ static void destroy(RBT **pT, void (* destroyfn) (void *data)){
     free(T);
     *pT = NULL;
   } else {
-    error("destroyRBT", "An attempt was made to destroy an empty RBT");
+    error("glxrbtree", "destroyRBT", "An attempt was made to destroy an empty RBT");
   }
 }
 
@@ -268,7 +242,7 @@ static RBT *findMin(RBT *T){
       }
     } 
   } else {
-    error("findMin", "An attempt was made to search in a NULL RBT");
+    error("glxrbtree", "findMin", "An attempt was made to search in a NULL RBT");
   }
 }
 

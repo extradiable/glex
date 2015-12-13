@@ -12,68 +12,76 @@
  * @name: glxrtree.c
  * @author: extradiable
  * @date: mié dic  2 06:35:54 CST 2015
- * @update:
+ * @updates:
  *
- * 11/07/15 - X
+ * 2015/12/13 - Use of struct to simulate namespace. 
  */
 
 #include "glxrtree.h"
 
-void destroyBranches(RBNode *T);
+static void destroyBranches(RBT *T, void (* destroyfn) (void *data));
 
-RTree *createRTree() {
+static RTree *create() {
   RTree *R = (RTree *) malloc(sizeof(RTree));
-  if (R) {
+  if (R != NULL) {
     R->value = NULL;
-    R->branches = createRBT();
+    R->branches = rbt.create();
   } else {
-    fprintf(stderr, "Insufficient memory to create RTree.");
-    exit(EXIT_FAILURE);
+    error("glxrtree", "create", "Insufficient memory to create RTree");
   }
   return R;
 }
 
-void *getBranch(RBTree *R, int8_t key) {
-  if (R) {
-    RBNode *N =  insertRBN(&(R->branches), key, NULL);
+static RTree *getBranch(RTree *R, int8_t key) {
+  if (R != NULL) {
+    RBT *N =  rbt.insert(&(R->branches), key, NULL);
     if (N->data == NULL) {
-      N->data = createRTree();
+      N->data = create();
     }
     return N->data;
   } else {
-    fprintf(stderr, "getBranch: invalid RTree call");
-    exit(EXIT_FAILURE);
+    error("glxrtree", "getBranch", "An attempt was made to use a NULL RBT");
   }
 }
 
-void setValue(RTree *R, void *value) {
-  if (R) {
-    RTree->value = data;
+static void setValue(RTree *R, void *value) {
+  if (R != NULL) {
+    R->value = value;
   } else {
-    fprintf(stderr, "setValue: invalid RTree call");
-    exit(EXIT_FAILURE);
+    error("glxrtree", "setValue", "An attempt was made to set value in a NULL RTree");
   }
 }
 
-void destroyBranches(RBNode *T, void (* fn) (void *data)){
-  if(T != NULL && !isEmptyRBT(T)){
-    RBNode *branch = T;
+static void destroy(RTree **pR, void (* destroyfn) (void *data)){
+  if (pR != NULL && *pR != NULL) {
+    RTree *R = *pR;
+    if (destroyfn != NULL) {
+      destroyfn(R->value);
+    }
+    R->value = NULL;
+    destroyBranches(R->branches, destroyfn);
+    free(R);
+    *pR = NULL;
+  } else {
+    error("glxrtree", "destroy", "An attempt was made to destroy a NULL RTree");
+  }
+}
+
+static void destroyBranches(RBT *T, void (* destroyfn) (void *data)){
+  if(T != NULL && !rbt.isEmpty(T)){
+    RBT *branch = T;
     do {
-      destroyRTree(branch->data, fn);
+      destroy(branch->data, destroyfn);
       branch->data = NULL;
       branch = branch->next;
     } while (branch != T);
-    freeRBT(T);
+    rbt.destroy(&T, NULL);
   }
 }
 
-void destroyRTree(RTree *R, void (* fn) (void *data)){
-  if(R != NULL) {
-    if (fn != NULL) {
-      fn(R->value);
-    }
-    R->value = NULL;
-    destroyBranches(R->branches, fn);
-    free(R);
-  }
-}
+rtree_lib const rtree = { 
+  create, 
+  getBranch,
+  setValue,
+  destroy 
+};

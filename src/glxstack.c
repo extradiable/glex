@@ -9,29 +9,13 @@
 
 #include "glxstack.h"
 
-void error(char *fn, char *msg);
-
-void error(char *fn, char *msg){
-  fprintf(
-    #ifndef DEBUG_H
-    stderr,
-    #else
-    stdout, 
-    #endif
-    "[error]: Source: glxstack:%s Message: %s.\n", fn, msg
-  );
-  #ifndef DEBUG_H
-  exit(EXIT_FAILURE);
-  #endif
-}
-
 static Stack *createStack() {
   Stack *S = (Stack *) malloc(sizeof(Stack *));
   if (S) {
     S->top = NULL;
     S->size = 0;
   } else {
-    error("createStack", "Insufficient memory to create Stack");
+    error("glxstack", "createStack", "Insufficient memory to create Stack");
   }
   return S;
 }
@@ -42,7 +26,7 @@ static Item *createItem(void *data) {
     I->data = data;
     I->next = NULL;
   } else {
-    error("createItem", "Insuficcient memory to create Item");
+    error("glxstack", "createItem", "Insuficcient memory to create Item");
   }
   return I;
 }
@@ -56,7 +40,7 @@ static void *pop(Stack *S) {
     free(I);
     return data;
   } else {
-    error("pop", "An attempt was made to pop() an empty Stack");
+    error("glxstack", "pop", "An attempt was made to pop() an empty Stack");
   }
   return NULL;
 }
@@ -74,7 +58,7 @@ static void *peek(Stack *S) {
   if (S != NULL && S->size) {
     return S->top->data;
   } else {
-    error("peek", "An attempt was made to peek() an empty Stack");
+    error("glxstack", "peek", "An attempt was made to peek() an empty Stack");
   }
   return NULL;
 }
@@ -91,7 +75,7 @@ static void destroy(Stack **pS, void (* destroyfn) (void *data)) {
     free(S);
     *pS = NULL;
   } else {
-    error("destroyStack", "An attempt was made to destroy an empty Stack");
+    error("glxstack", "destroy", "An attempt was made to destroy an empty Stack");
   }
 }
 
