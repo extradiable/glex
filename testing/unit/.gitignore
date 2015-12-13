@@ -1,0 +1,11 @@
+# Object files
+*.o
+
+# Executables
+*.exe
+
+# Log files
+*.log
+
+# Others
+*.swp

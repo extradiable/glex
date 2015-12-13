@@ -1,0 +1,18 @@
+[*] Test: destroy a NULL red black tree.
+[error]: Source: glxstack:destroyRBT Message: An attempt was made to destroy an empty RBT.
+[+] Ok.
+[*] Test: search key in NULL red black tree.
+[error]: Source: glxstack:containsKey Message: An attempt was made to search in a NULL RBT.
+[+] Ok.
+[*] Test: find min-key element in NULL red black tree.
+[error]: Source: glxstack:findMin Message: An attempt was made to search in a NULL RBT.
+[+] Ok.
+[*] Test: dump NULL red black tree with NULL file pointer.
+[error]: Source: glxstack:dump Message: An attempt was made to write in a NULL file pointer.
+[+] Ok.
+[*] Test: dump NULL red black tree to stdout.
+NULL RBT
+[+] Ok.
+[*] Test: join two NULL red black trees.
+[error]: Source: glxstack:join Message: An attempt was made to use NULL RBT.
+[+] Ok.
