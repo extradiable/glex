@@ -3,12 +3,17 @@
 exec rm -f stack.exe
 exec rm -f compilation.log
 
+set files {}
+lappend files "../../../src/glxerrors.h"
+lappend files "../../../src/glxerrors.c"
+lappend files "../../../src/glxstack.h"
+lappend files "../../../src/glxstack.c"
+lappend files "test_glxstack.c"
+
 set command {gcc -g -DDEBUG_H -o stack.exe}
-lappend command "../../../src/glxerrors.h"
-lappend command "../../../src/glxerrors.c"
-lappend command "../../../src/glxstack.h"
-lappend command "../../../src/glxstack.c"
-lappend command "test_glxstack.c"
+foreach file $files {
+  lappend command $file
+}
 if {[catch {exec >& compilation.log {*}$command}]} {
   puts "compilation FAILED." 
   exit 1

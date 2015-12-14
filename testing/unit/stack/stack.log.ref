@@ -1,5 +1,5 @@
 [*] Test Name: destroy a NULL stack.
-[error]: Source: glxstack:destroyStack Message: An attempt was made to destroy an empty Stack.
+[error]: Source: glxstack:destroy Message: An attempt was made to destroy an empty Stack.
 [+] Ok.
 [*] Test Name: peek NULL stack.
 [error]: Source: glxstack:peek Message: An attempt was made to peek() an empty Stack.
@@ -7,7 +7,7 @@
 [*] Test Name: destroy a stack with 1 element.
 [+] Ok.
 [*] Test Name: try to destroy the stack again.
-[error]: Source: glxstack:destroyStack Message: An attempt was made to destroy an empty Stack.
+[error]: Source: glxstack:destroy Message: An attempt was made to destroy an empty Stack.
 [+] Ok.
 [*] Test Name: Push [0, 9] integers.
 [+] Ok.

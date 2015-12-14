@@ -3,12 +3,20 @@
 exec rm -f rtree.exe
 exec rm -f compilation.log
 
+set files {}
+lappend files "../../../src/glxerrors.h"
+lappend files "../../../src/glxerrors.c"
+lappend files "../../../src/glxrbtree.h"
+lappend files "../../../src/glxrbtree.c"
+lappend files "../../../src/glxrtree.h"
+lappend files "../../../src/glxrtree.c"
+lappend files "test_glxrtree.c"
+
 set command {gcc -g -DDEBUG_H -o rtree.exe}
-lappend command "../../../src/glxrbtree.h"
-lappend command "../../../src/glxrbtree.c"
-lappend command "../../../src/glxrtree.h"
-lappend command "../../../src/glxrtree.c"
-lappend command "test_glxrtree.c"
+foreach file $files {
+  lappend command $file
+}
+
 if {[catch {exec >& compilation.log {*}$command}]} {
   puts "compilation FAILED." 
   exit 1

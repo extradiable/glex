@@ -3,12 +3,18 @@
 exec rm -f queue.exe
 exec rm -f compilation.log
 
+set files {}
+lappend files "../../../src/glxerrors.h"
+lappend files "../../../src/glxerrors.c"
+lappend files "../../../src/glxqueue.h"
+lappend files "../../../src/glxqueue.c"
+lappend files "test_glxqueue.c"
+
 set command {gcc -g -DDEBUG_H -o queue.exe}
-lappend command "../../../src/glxerrors.h"
-lappend command "../../../src/glxerrors.c"
-lappend command "../../../src/glxqueue.h"
-lappend command "../../../src/glxqueue.c"
-lappend command "test_glxqueue.c"
+foreach file $files {
+  lappend command $file
+}
+
 if {[catch {exec >& compilation.log {*}$command}]} {
   puts "compilation FAILED." 
   exit 1

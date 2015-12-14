@@ -1,0 +1,4 @@
+[*] Test Name: destroy a NULL Recursive Tree.
+[error]: Source: glxrtree:destroy Message: An attempt was made to destroy a NULL RTree.
+[+] Ok.
+[*] Unit test for glxrtree is done!
