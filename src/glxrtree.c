@@ -52,7 +52,7 @@ static void setValue(RTree *R, void *value) {
   }
 }
 
-static void destroy(RTree **pR, void (* destroyfn) (void *data)){
+static void destroy(RTree **pR, void (* destroyfn) (void *data)) {
   if (pR != NULL && *pR != NULL) {
     RTree *R = *pR;
     if (destroyfn != NULL) {
@@ -62,13 +62,11 @@ static void destroy(RTree **pR, void (* destroyfn) (void *data)){
     destroyBranches(R->branches, destroyfn);
     free(R);
     *pR = NULL;
-  } else {
-    error("glxrtree", "destroy", "An attempt was made to destroy a NULL RTree");
   }
 }
 
-static void destroyBranches(RBT *T, void (* destroyfn) (void *data)){
-  if(T != NULL && !rbt.isEmpty(T)){
+static void destroyBranches(RBT *T, void (* destroyfn) (void *data)) {
+  if(T != NULL && !rbt.isEmpty(T)) {
     RBT *branch = T;
     do {
       destroy(branch->data, destroyfn);

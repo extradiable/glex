@@ -1,5 +1,4 @@
 [*] Test: destroy a NULL red black tree.
-[error]: Source: glxrbtree:destroyRBT Message: An attempt was made to destroy an empty RBT.
 [+] Ok.
 [*] Test: search key in NULL red black tree.
 [error]: Source: glxrbtree:containsKey Message: An attempt was made to search in a NULL RBT.
@@ -11,8 +10,30 @@
 [error]: Source: glxrbtree:dump Message: An attempt was made to write in a NULL file pointer.
 [+] Ok.
 [*] Test: dump NULL red black tree to stdout.
-NULL RBT
+EMPTY RBT
 [+] Ok.
 [*] Test: join two NULL red black trees.
 [error]: Source: glxrbtree:join Message: An attempt was made to use NULL RBT.
 [+] Ok.
+[*] Test: create red black tree.
+[+] Ok.
+[*] Test: insert integers [1-2] with NULL values.
+[+] Ok.
+[*] Test: dump red black tree to stdout.
+(key: 1, value: (nil)) (key: 2, value: (nil)) 
+[+] Ok.
+[*] Test: join two trees.
+(key: 1, value: (nil)) (key: 2, value: (nil)) (key: 3, value: (nil)) (key: 4, value: (nil)) 
+[+] Ok.
+[*] Test: destroy red black tree.
+[+] Ok.
+[*] Test: find key min.
+Min: 1.
+[+] Ok.
+[*] Test: search unexistent key in red black tree.
+0
+[+] Ok.
+[*] Test: search key in red black tree.
+1
+[+] Ok.
+[*] Unit test for glxrbtree is done!

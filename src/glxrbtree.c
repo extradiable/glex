@@ -186,13 +186,20 @@ static void join(RBT **T, RBT *F){
  * A convenient function for output the content of the tree
  */
 static void dump(RBT *T, FILE *fp) {
+  if (!isEmpty(T)) {
+    dump(T->left, fp);
+    fprintf(fp, "(key: %d, value: %p) ", T->key, T->data);
+    dump(T->right, fp);
+  }
+}
+
+static void _dump(RBT *T, FILE *fp) {
   if (fp != NULL) {
-    if (T == NULL || T == &sentinel) {
-      fprintf(fp, "NULL RBT");
+    if (isEmpty(T)) {
+      fprintf(fp, "EMPTY RBT\n");
     } else {
-      dump(T->left, fp);
-      fprintf(fp, "%d ", T->key);
-      dump(T->right, fp);
+      dump(T, fp);
+      fprintf(fp, "\n");
     } 
   } else {
     error("glxrbtree", "dump", "An attempt was made to write in a NULL file pointer");
@@ -219,16 +226,16 @@ static char containsKey(RBT *T, uint16_t key){
 /*
  * A convenient function for clean up
  */
-static void destroy(RBT **pT, void (* destroyfn) (void *data)){
-  if (pT != NULL && *pT != NULL && *pT != &sentinel){
+static void destroy(RBT **pT, void (* destroyfn) (void *data)) {
+  if (pT != NULL && !isEmpty(*pT)) {
     RBT *T = *pT;
     destroy(&T->left, destroyfn);
     destroy(&T->right, destroyfn);
-    destroyfn(T->data);
+    if (destroyfn) {
+      destroyfn(T->data);
+    }
     free(T);
     *pT = NULL;
-  } else {
-    error("glxrbtree", "destroyRBT", "An attempt was made to destroy an empty RBT");
   }
 }
 
@@ -237,7 +244,7 @@ static RBT *findMin(RBT *T){
     while(1) {
       if (isEmpty(T->left)) {
         return T;
-      } else {
+      } else { 
         T = T->left;
       }
     } 
@@ -251,7 +258,7 @@ rbt_lib const rbt = {
   create,
   isEmpty,
   insert,
-  dump,
+  _dump,
   join,
   containsKey,
   destroy 

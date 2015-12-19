@@ -1,4 +1,16 @@
-[*] Test Name: destroy a NULL Recursive Tree.
-[error]: Source: glxrtree:destroy Message: An attempt was made to destroy a NULL RTree.
+[*] Test: destroy a NULL Recursive Tree.
+[+] Ok.
+[*] Test: branch a NULL Recursive Tree.
+[error]: Source: glxrtree:getBranch Message: An attempt was made to use a NULL RBT.
+[+] Ok.
+[*] Test: create recursive tree.
+[+] Ok.
+[*] Test: add branches.
+[+] Ok.
+[*] Test: set value.
+[+] Ok.
+[*] Test: add branches.
+[+] Ok.
+[*] Test: destroy Recursive Tree.
 [+] Ok.
 [*] Unit test for glxrtree is done!
