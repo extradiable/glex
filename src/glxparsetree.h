@@ -12,9 +12,10 @@
 #include <stdint.h>
 #include <stdio.h>
 #include <stdlib.h>
-#include "glxreader.h"
+#include "glxlexer.h"
 #include "glxrbtree.h"
 #include "glxptnode.h"
+#include "glxerrors.h"
 #include "glxstack.h"
 
 struct Transition {
@@ -35,14 +36,9 @@ typedef struct Transition Transition;
 
 typedef struct ParseInfo ParseInfo;
 
-/* Reads a file containing a regular expression and generates 
- * the parse tree
- */
-PTNode *glx_parse(uint8_t *fileName);
-
 /* This function computes all necessary functions before 
  * generating the deterministic finite automaton
  */
-void glx_makeAutomaton(uint8_t *fileName);
+void makeAutomaton(uint8_t *fileName);
 
 #endif

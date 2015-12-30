@@ -25,8 +25,8 @@ struct PTNode{
   uint8_t symbol;
   int8_t nullable;
   int16_t leaf;
-  RBNode *firstpos;
-  RBNode *lastpos;
+  RBT *firstpos;
+  RBT *lastpos;
 };
 
 typedef struct PTNode PTNode;

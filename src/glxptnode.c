@@ -25,17 +25,20 @@ PTNode *createPTNode(int8_t token, uint8_t lexeme, uint8_t symbol){
     N->lexeme = lexeme;
     N->symbol = symbol;
     N->leaf = -1;
-    N->firstpos = createRBT();
-    N->lastpos = createRBT();
-    N->left = NULL;
-    N->right = NULL;
+    N->firstpos = rbt.create();
+    N->lastpos = rbt.create();
+    //TODO: ptnode is no longer a tree but a stack
+    //N->left = NULL;
+    //N->right = NULL;
   }else{
     fprintf(stderr, "Insuficient memory to create PTNode");  
     exit(EXIT_SUCCESS);
   }
   return N;
-};
+}
 
+//TODO: ptnode is no longer a tree but a stack
+/*
 void preordenPT(PTNode *T, void(*ptrF)(void *)){
   if(T!=NULL){
     (*ptrF)(T);
@@ -59,18 +62,21 @@ void postordenPT(PTNode *T, void (*ptrF)(PTNode *)){
     (*ptrF)(T);
   }
 }
-
+*/
 /* Frees the allocated memory used for this node */
 void freePTNode(PTNode *T){
-  freeRBT(T->firstpos);
-  freeRBT(T->lastpos);
+  rbt.destroy(&T->firstpos, NULL);
+  rbt.destroy(&T->lastpos, NULL);
   free(T);
 }
 
 void freePT(PTNode *T){
-  postordenPT(T, (void *) &freePTNode);
-};
+  //TODO: ptnode is no longer a tree but a stack of nodes
+  //postordenPT(T, (void *) &freePTNode);
+}
 
+//TODO: ptnode is no longer a tree but a stack
+/*
 void dumpST(FILE *fpLog, PTNode *T, int16_t *node, int16_t *leaf){
   if(T){
     int8_t l = T->left || T->right ? 0 : 1;
@@ -96,3 +102,4 @@ void dumpSyntaxTree(FILE *fpLog, PTNode *T){
     dumpST(fpLog, T, &node, &leaf);
   }
 }
+*/

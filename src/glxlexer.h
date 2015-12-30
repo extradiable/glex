@@ -17,9 +17,13 @@
 void initLexer(uint8_t *name);
 
 /* Returns next token found */
-PTNode *getNextToken(void);
+//PTNode *getNextToken(void);
 
 /* Convenient method to free allocated memory used by glxlexer */
 void freeLexer(void);
+
+uint8_t readByte(void);
+
+uint8_t hasNextByte();
 
 #endif

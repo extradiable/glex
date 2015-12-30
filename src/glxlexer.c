@@ -121,7 +121,7 @@ uint8_t readByte(void) {
   return buffer[pos++];  
 }
 
-PTNode *getNextToken(void){
+/*PTNode *getNextToken(void){
   uint8_t ascii = readByte();
   readEmptyLines()
   if (currentExpression == 0) {
@@ -135,7 +135,7 @@ PTNode *getNextToken(void){
   consumeBlanks()
   // TODO 
 }
-
+*/
 void freeLexer(){
   fclose(fp);
 }

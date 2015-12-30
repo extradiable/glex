@@ -28,7 +28,7 @@ void usage(void){
 
 int main(int argc, char **argv){
   if(argc > 1){
-    glx_makeAutomaton(argv[1]);
+    makeAutomaton(argv[1]);
   }else{
     usage();
     return 1;
