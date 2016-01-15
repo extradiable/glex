@@ -39,6 +39,16 @@ proc runTest {module} {
 
 proc checkOutput {module} {
   puts "\[$module] Comparing output with reference log."
+  if {![file exists "${module}.log.ref"]} {
+    puts "\[$module] Reference log does not exist: "
+    return 0
+  }
+
+  if {![file exists "${module}.log"]} {
+    puts "\[$module] Generated log does not exist: "
+    return 0
+  }
+
   set output1 [exec sha1sum "${module}.log.ref"]
   set output2 [exec sha1sum "${module}.log"]
   return [string equal [lindex $output1 0] [lindex $output2 0]]

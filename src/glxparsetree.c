@@ -24,7 +24,7 @@
 
 #define consumeBlanks() \
   while (ascii == ' ' || ascii == '\t') {\
-    ascii = readByte();\
+    ascii = reader.readByte();\
   }
 
 /* These constants are used to read the name of expressions */
@@ -110,15 +110,15 @@ void init(void);
 PTNode *parse(uint8_t *fileName){
   Stack *tree = stack.create();
   PTNode *T = NULL;
-  initLexer(fileName);
+  reader.init(fileName);
   do {
     readExpressionName();
        
-  } while(hasNextByte());
+  } while(reader.hasNextByte());
 
   //TODO: fix this function by adding the call to re()
   /*
-  while((current = readByte()) != '\0'){
+  while((current = reader.readByte()) != '\0'){
     if(!containsKeyRBT(whitespaces, current)){
       if(T){
         T = join(T, &re, OR);
@@ -146,7 +146,9 @@ PTNode *parse(uint8_t *fileName){
 void readExpressionName() {
   RTree *branch = dictionary;
   uint8_t name[MAX_EXPNAME_LENGTH + 1];
-  uint8_t ascii = readByte();
+  uint8_t ascii = reader.readByte();
+  printf("[%c]\n", ascii);
+  exit(0);
   uint8_t i;
   consumeBlanks(); 
   for(i = 0; i < MAX_EXPNAME_LENGTH; i++) {
@@ -324,7 +326,7 @@ PTNode *re(){
 PTNode *or(){
   PTNode *t = cat();
   while(current == OR){
-    current = readByte();
+    current = reader.readByte();
     t = join(t, &cat, OR);
   }
   return t;
@@ -344,7 +346,7 @@ PTNode *star(){
     t = join(t, NULL, STAR);  
   }
   while(current == STAR){
-    current = readByte();
+    current = reader.readByte();
   }
   return t;
 }
@@ -352,10 +354,10 @@ PTNode *star(){
 PTNode *sym(){
   PTNode *t;
   if(current == O_GROUP){ 
-    current = readByte();
+    current = reader.readByte();
     t = re();
     if(current == C_GROUP){
-      current = readByte();
+      current = reader.readByte();
     }else{
       fprintf(stderr, "Unexpected end of input. ')' is missing.");
       exit(EXIT_FAILURE);
@@ -364,7 +366,7 @@ PTNode *sym(){
     t = NULL;
   }else{
     t = createSymbol();
-    current = readByte();
+    current = reader.readByte();
   }
   return t;
 }
