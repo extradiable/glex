@@ -12,7 +12,6 @@
 #ifndef RTREE_H
 #define RTREE_H 1
 #include "glxrbtree.h"
-#include "glxerrors.h"
 #include <stdint.h>
 #include <stdlib.h>
 

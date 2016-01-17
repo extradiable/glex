@@ -7,6 +7,7 @@
  * @update: sáb oct 17 07:39:52 CDT 2015
  */
 
+#include "glex.h"
 #include "glxstack.h"
 
 static Stack *createStack() {

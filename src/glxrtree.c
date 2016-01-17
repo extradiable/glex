@@ -17,6 +17,8 @@
  * 2015/12/13 - Use of struct to simulate namespace. 
  */
 
+#include "glex.h"
+#include "glex.h"
 #include "glxrtree.h"
 
 static void destroyBranches(RBT *T, void (* destroyfn) (void *data));

@@ -16,7 +16,6 @@
 
 #include <string.h>
 #include <stdio.h>
-#include "glxerrors.h"
 #include "glxreader.h"
 #include "glxrtree.h"
 #include "glxstack.h"
@@ -39,9 +38,9 @@
 /* Max number of characters in expression name */
 #define MAX_EXPNAME_LENGTH 80
 
-#define READ_EXPR_NAME_1 0
-#define READ_EXPR_NAME_2 1
-#define READ_EXPR_NAME_3 2
+#define READ_EXPRNAME_ERR_1 0
+#define READ_EXPRNAME_ERR_2 1
+#define READ_EXPRNAME_ERR_3 2
 
 /** SECTION: GLOBALS */
 
@@ -134,6 +133,7 @@ PTNode *parse(uint8_t *fileName){
       if(ascii == '\n')
         break;
     }
+    // TODO: implement re() using a stack
     consumeAllSpaces()
   } while(reader.hasNextByte());
 
@@ -183,15 +183,15 @@ void showError(int8_t code) {
   char msg[50 + MAX_EXPNAME_LENGTH];
   int8_t line = reader.getLine();
   switch(code) {
-    case READ_EXPR_NAME_1:
+    case READ_EXPRNAME_ERR_1:
       sprintf(msg, "Expected ':' but found '%c'. Line: %d", ascii, line);
       err.show("glxparser", "readExpressionName", msg);
       break;
-    case READ_EXPR_NAME_2:
+    case READ_EXPRNAME_ERR_2:
       sprintf(msg, "No expression name was given. Line: %d", line);
       err.show("glxparser", "readExpressionName", msg);
       break;
-    case READ_EXPR_NAME_3:
+    case READ_EXPRNAME_ERR_3:
       sprintf(msg, "Duplicated name found '%s'. Line: %d", currentName, line);
       err.show("glxparser", "readExpressionName", msg);
       break;
@@ -213,11 +213,11 @@ void readExpressionName() {
   currentName[i] = '\0'; 
   consumeLineSpaces()
   if (ascii != ':') {
-    showError(READ_EXPR_NAME_1);
+    showError(READ_EXPRNAME_ERR_1);
   } else if (i == 0) {
-    showError(READ_EXPR_NAME_2);
+    showError(READ_EXPRNAME_ERR_2);
   } else if (branch->value != NULL) {
-    showError(READ_EXPR_NAME_3);
+    showError(READ_EXPRNAME_ERR_3);
   } else {
     char cpy[i];
     strcpy(cpy, currentName);
@@ -352,7 +352,7 @@ Transition *createTransition(int16_t currentState, uint8_t symbol, int16_t nextS
  * This function directs the flow from input file to DFA. If you want to know
  * the flow of this file, this is the function you want to take a look.
  */
-void makeAutomaton(uint8_t *fileName);
+void makeAutomaton(Config *config);
 
 
 
@@ -630,11 +630,11 @@ void generateStates(RBT *firstState){
   destroyStack(newStates);*/
 }
 
-void makeAutomaton(uint8_t *fileName){
+void makeAutomaton(Config *config){
   // 0. Initialize necessary structures. 
   init();
   // 1. Build syntax tree for augmented regular expression (r)#
-  PTNode *T = parse(fileName);  /*
+  PTNode *T = parse(config->input);  /*
   // 2. Compute auxiliary functions nullable, firstpos and lastpos 
   computeAuxiliaryFunctions(T);
   // 3. Compute followpos function

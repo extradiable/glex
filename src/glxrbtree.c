@@ -17,7 +17,9 @@
  * @updated: dom oct 25 16:57:42 CST 2015
  */
 
+#include "glex.h"
 #include "glxrbtree.h"
+
 #define RED 1
 #define BLACK 0
 

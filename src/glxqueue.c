@@ -7,6 +7,7 @@
  * @update: dom dic  6 18:39:43 CST 2015
  */
 
+#include "glex.h"
 #include "glxqueue.h"
 
 static Queue *createQueue() {

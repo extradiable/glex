@@ -10,7 +10,7 @@ proc compile {module} {
   exec rm -f compilation.log
   puts "\[$module] Prepare gcc command."
   source sources.tcl.sh
-  set command "gcc -g -DDEBUG_H -o ${module}.exe"
+  set command "gcc -g -DDEBUG_H -DUNIT_TESTING_H -o ${module}.exe"
   foreach file $files {
     lappend command $file
   } 

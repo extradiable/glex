@@ -12,9 +12,9 @@
 #include <stdint.h>
 #include <stdio.h>
 #include <stdlib.h>
+#include "glex.h"
 #include "glxrbtree.h"
 #include "glxptnode.h"
-#include "glxerrors.h"
 #include "glxstack.h"
 
 struct Transition {
@@ -38,6 +38,6 @@ typedef struct ParseInfo ParseInfo;
 /* This function computes all necessary functions before 
  * generating the deterministic finite automaton
  */
-void makeAutomaton(uint8_t *fileName);
+void makeAutomaton(Config *config);
 
 #endif
