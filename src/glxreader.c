@@ -26,8 +26,8 @@
 /* Max number of characters in expression name */
 #define MAX_EXPNAME_LENGTH 80
 
-// TODO: should this variable be here?
-//int8_t currentLine = 1;
+/* Line counter. */
+int8_t currentLine = 1;
 
 /* Pointer to regular expressions file. */
 FILE *fp;
@@ -49,11 +49,15 @@ uint16_t limit = 0;
 void loadBuffer(void);
 
 static void initLexer(uint8_t *name){
+  pos = 0;
+  limit = 0;
+  buffer[0] = '\0';
   fp = fopen(name, "r");
   if(fp == NULL){
     char message[] = "Unable to open file: ";
     error("glxreader", "init", strcat(message, name));
   }
+  loadBuffer();
   #ifdef DEBUG_H
   printf("File opened: %s\n", name);
   #endif
@@ -75,7 +79,12 @@ static uint8_t hasNextByte(){
   return pos < limit;
 }
 
+static int8_t getLine(void){
+  return currentLine;
+}
 static uint8_t readByte(void) {
+  if(buffer[pos] == '\n')
+    currentLine++;
   if(pos > limit) {
     loadBuffer();
   }
@@ -90,5 +99,6 @@ reader_lib const reader = {
   initLexer, 
   readByte,
   hasNextByte,
+  getLine,
   freeLexer
 };

@@ -24,6 +24,9 @@ typedef struct {
   /* Returns true if EOF has not been reached */
   uint8_t (* hasNextByte) (void);
 
+  /* Returns current line counter */
+  int8_t (* getLine) (void);
+
   /* Free all resources from this reader */
   void (* free) (void);
 

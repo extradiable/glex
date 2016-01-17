@@ -15,7 +15,7 @@ static Stack *createStack() {
     S->top = NULL;
     S->size = 0;
   } else {
-    error("glxstack", "createStack", "Insufficient memory to create Stack");
+    err.show("glxstack", "createStack", "Insufficient memory to create Stack");
   }
   return S;
 }
@@ -26,7 +26,7 @@ static Item *createItem(void *data) {
     I->data = data;
     I->next = NULL;
   } else {
-    error("glxstack", "createItem", "Insuficcient memory to create Item");
+    err.show("glxstack", "createItem", "Insuficcient memory to create Item");
   }
   return I;
 }
@@ -40,7 +40,7 @@ static void *pop(Stack *S) {
     free(I);
     return data;
   } else {
-    error("glxstack", "pop", "An attempt was made to pop() an empty Stack");
+    err.show("glxstack", "pop", "An attempt was made to pop() an empty Stack");
   }
   return NULL;
 }
@@ -58,7 +58,7 @@ static void *peek(Stack *S) {
   if (S != NULL && S->size) {
     return S->top->data;
   } else {
-    error("glxstack", "peek", "An attempt was made to peek() an empty Stack");
+    err.show("glxstack", "peek", "An attempt was made to peek() an empty Stack");
   }
   return NULL;
 }
@@ -75,7 +75,7 @@ static void destroy(Stack **pS, void (* destroyfn) (void *data)) {
     free(S);
     *pS = NULL;
   } else {
-    error("glxstack", "destroy", "An attempt was made to destroy an empty Stack");
+    err.show("glxstack", "destroy", "An attempt was made to destroy an empty Stack");
   }
 }
 

@@ -12,7 +12,6 @@
 #include <stdint.h>
 #include <stdio.h>
 #include <stdlib.h>
-#include "glxlexer.h"
 #include "glxrbtree.h"
 #include "glxptnode.h"
 #include "glxerrors.h"

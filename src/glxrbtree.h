@@ -49,6 +49,9 @@ typedef struct {
   
   /** checks whether given key exists in Tree T */
   char (* containsKey) (RBT *T, uint16_t key);
+
+  /** Get node containing the key, NULL if no such node exists */
+  RBT * (* get) (RBT *T, uint16_t key);
   
   /** Cleanup */
   void (* destroy) (RBT **pT, void (* destroyfn) (void *data));

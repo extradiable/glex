@@ -44,7 +44,7 @@ static RBT *createNode(uint16_t key, void *data){
     N->left = N->right = create();
     N->next = N->prev = N;
   }else{
-    error("glxrbtree", "createNode", "Insufficient memory to create R.B. Node");
+    err.show("glxrbtree", "createNode", "Insufficient memory to create R.B. Node");
   }
   return N;
 }
@@ -178,7 +178,7 @@ static void join(RBT **T, RBT *F){
       } while(N != F);
     }
   } else {
-    error("glxrbtree", "join", "An attempt was made to use NULL RBT");
+    err.show("glxrbtree", "join", "An attempt was made to use NULL RBT");
   }
 }
 
@@ -202,7 +202,7 @@ static void _dump(RBT *T, FILE *fp) {
       fprintf(fp, "\n");
     } 
   } else {
-    error("glxrbtree", "dump", "An attempt was made to write in a NULL file pointer");
+    err.show("glxrbtree", "dump", "An attempt was made to write in a NULL file pointer");
   }
 }
 
@@ -219,7 +219,24 @@ static char containsKey(RBT *T, uint16_t key){
     }
     return 0;
   } else {
-    error("glxrbtree", "containsKey", "An attempt was made to search in a NULL RBT");
+    err.show("glxrbtree", "containsKey", "An attempt was made to search in a NULL RBT");
+  }
+}
+
+static RBT *get(RBT *T, uint16_t key){
+  if (T != NULL) {
+    if (T!=&sentinel) {
+      if (key == T->key) {
+        return T;
+      } else if (key > T->key) {
+        return get(T->right, key);
+      } else {
+        return get(T->left, key);
+      }
+    }
+    return NULL;
+  } else {
+    err.show("glxrbtree", "get", "An attempt was made to search in a NULL RBT");
   }
 }
 
@@ -249,7 +266,7 @@ static RBT *findMin(RBT *T){
       }
     } 
   } else {
-    error("glxrbtree", "findMin", "An attempt was made to search in a NULL RBT");
+    err.show("glxrbtree", "findMin", "An attempt was made to search in a NULL RBT");
   }
 }
 
@@ -261,5 +278,6 @@ rbt_lib const rbt = {
   _dump,
   join,
   containsKey,
+  get,
   destroy 
 };

@@ -27,7 +27,7 @@ static RTree *create() {
     R->value = NULL;
     R->branches = rbt.create();
   } else {
-    error("glxrtree", "create", "Insufficient memory to create RTree");
+    err.show("glxrtree", "create", "Insufficient memory to create RTree");
   }
   return R;
 }
@@ -40,7 +40,7 @@ static RTree *getBranch(RTree *R, int8_t key) {
     }
     return N->data;
   } else {
-    error("glxrtree", "getBranch", "An attempt was made to use a NULL RBT");
+    err.show("glxrtree", "getBranch", "An attempt was made to use a NULL RBT");
   }
 }
 
@@ -48,7 +48,7 @@ static void setValue(RTree *R, void *value) {
   if (R != NULL) {
     R->value = value;
   } else {
-    error("glxrtree", "setValue", "An attempt was made to set value in a NULL RTree");
+    err.show("glxrtree", "setValue", "An attempt was made to set value in a NULL RTree");
   }
 }
 

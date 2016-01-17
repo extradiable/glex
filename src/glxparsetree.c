@@ -14,39 +14,55 @@
 
 /** SECTION: HEADER FILES */
 
+#include <string.h>
 #include <stdio.h>
-#include "glxlexer.h"
+#include "glxerrors.h"
+#include "glxreader.h"
 #include "glxrtree.h"
 #include "glxstack.h"
 #include "glxparsetree.h"
 
 /** SECTION: DEFINE */
 
-#define consumeBlanks() \
+#define consumeLineSpaces() \
   while (ascii == ' ' || ascii == '\t') {\
     ascii = reader.readByte();\
   }
 
-/* These constants are used to read the name of expressions */
-#define NUM_MASK 0x30
-#define LCL_MASK 0x60
-#define UCL_MASK 0x40
+#define consumeAllSpaces() \
+  while(reader.hasNextByte()) {\
+    ascii = reader.readByte();\
+    if(ascii != '\n' || ascii != '\t' || ascii != ' ')\
+      break;\
+  }
 
 /* Max number of characters in expression name */
 #define MAX_EXPNAME_LENGTH 80
 
+#define READ_EXPR_NAME_1 0
+#define READ_EXPR_NAME_2 1
+#define READ_EXPR_NAME_3 2
+
 /** SECTION: GLOBALS */
 
-int8_t currentLine = 1;
+typedef struct {
+  char min;
+  char max;
+} Range;
 
-/* Counter of the number of expressions read so far  */
+/* Current character being analized */
+uint8_t ascii = '\0';
+
+/* Counter of the number of expressions read so far */
 int8_t numExpressions = 0;
 
-/* Flags whether a new expression name must be read  */
+/* Flags whether a new expression name must be read */
 int8_t currentExpression = 0;
 
 /* This pointer is maintained for logging purposes. */
 FILE *fpLog = NULL;
+
+uint8_t *currentName = NULL;
 
 /*
  * Alphabet is ascii and all symbols are allowed, there are however, symbols 
@@ -94,8 +110,7 @@ uint8_t *positionToSymbol = NULL;
 RTree *dictionary;
 
 /* High order nibbles of letters and digits */
-RBT *high = NULL;
-
+RBT *ranges = NULL;
 
 /** SECTION: FUNCTION DEFINITIONS */
 
@@ -112,8 +127,14 @@ PTNode *parse(uint8_t *fileName){
   PTNode *T = NULL;
   reader.init(fileName);
   do {
+    consumeAllSpaces()
     readExpressionName();
-       
+    while(reader.hasNextByte()) {
+      ascii = reader.readByte();      
+      if(ascii == '\n')
+        break;
+    }
+    consumeAllSpaces()
   } while(reader.hasNextByte());
 
   //TODO: fix this function by adding the call to re()
@@ -143,36 +164,63 @@ PTNode *parse(uint8_t *fileName){
   */
 }
 
+int8_t valid() {
+  uint8_t hnibble = ascii & 0xF0;
+  uint8_t lnibble = ascii & 0x0F;
+  RBT *T = rbt.get(ranges, hnibble);
+  if (T != NULL) {
+    Range *r = T->data;
+    if (lnibble >= r->min && lnibble <= r->max){
+      return 1;
+    } else {
+      return ascii == '_';
+    }  
+  }
+  return 0;
+}
+
+void showError(int8_t code) {
+  char msg[50 + MAX_EXPNAME_LENGTH];
+  int8_t line = reader.getLine();
+  switch(code) {
+    case READ_EXPR_NAME_1:
+      sprintf(msg, "Expected ':' but found '%c'. Line: %d", ascii, line);
+      err.show("glxparser", "readExpressionName", msg);
+      break;
+    case READ_EXPR_NAME_2:
+      sprintf(msg, "No expression name was given. Line: %d", line);
+      err.show("glxparser", "readExpressionName", msg);
+      break;
+    case READ_EXPR_NAME_3:
+      sprintf(msg, "Duplicated name found '%s'. Line: %d", currentName, line);
+      err.show("glxparser", "readExpressionName", msg);
+      break;
+  }
+}
+
 void readExpressionName() {
   RTree *branch = dictionary;
-  uint8_t name[MAX_EXPNAME_LENGTH + 1];
-  uint8_t ascii = reader.readByte();
-  printf("[%c]\n", ascii);
-  exit(0);
+  ascii = reader.readByte();
+  consumeLineSpaces();
   uint8_t i;
-  consumeBlanks(); 
   for(i = 0; i < MAX_EXPNAME_LENGTH; i++) {
-    uint8_t hnibble = ascii & 0xF0;
-    if (!rbt.containsKey(high, hnibble)) {
-      if (ascii != '_') {
-        break; // ascii is not a valid character
-      }
-    }
-    name[i] = ascii;
+    if(!valid(ascii))
+       break;
+    currentName[i] = ascii;
     branch =  rtree.getBranch(branch, ascii);
+    ascii = reader.readByte();
   }
-  name[i] = '\0'; 
-  consumeBlanks()
+  currentName[i] = '\0'; 
+  consumeLineSpaces()
   if (ascii != ':') {
-    fprintf(stderr, "GLEX error: Expected ':' but found '%c'. Line %d.\n", ascii, currentLine);
-    exit(EXIT_FAILURE);
+    showError(READ_EXPR_NAME_1);
   } else if (i == 0) {
-    fprintf(stderr, "GLEX error: No expression name was given. Line %d.\n", currentLine);
-    exit(EXIT_FAILURE);
+    showError(READ_EXPR_NAME_2);
   } else if (branch->value != NULL) {
-    fprintf(stderr, "GLEX error: Duplicated name found '%s'. Line: %d.\n", name, currentLine);
-    exit(EXIT_FAILURE);
+    showError(READ_EXPR_NAME_3);
   } else {
+    char cpy[i];
+    strcpy(cpy, currentName);
     uint8_t *value = (uint8_t *) malloc(sizeof(uint8_t));
     currentExpression = ++numExpressions;
     *value = currentExpression;
@@ -181,16 +229,39 @@ void readExpressionName() {
 }
 
 void init(){
-  high = rbt.create();
-  rbt.insert(&high, NUM_MASK, NULL);
-  rbt.insert(&high, LCL_MASK, NULL);
-  rbt.insert(&high, UCL_MASK, NULL);
-
+  currentName = malloc((MAX_EXPNAME_LENGTH + 1) * sizeof(uint8_t));
+  ranges = rbt.create();
+  // number ranges
+  Range *r = (Range *) malloc(sizeof(Range));
+  r->min = 0x00;
+  r->max = 0x09;
+  rbt.insert(&ranges, 0x30, r);
+  // upper case letters ranges
+  r = (Range *) malloc(sizeof(Range));
+  r->min = 0x01;
+  r->max = 0x0F;
+  rbt.insert(&ranges, 0x40, r);
+  r = (Range *) malloc(sizeof(Range));
+  r->min = 0x00;
+  r->max = 0x0A;
+  rbt.insert(&ranges, 0x50, r);
+  // lower case letters ranges
+  r = (Range *) malloc(sizeof(Range));
+  r->min = 0x01;
+  r->max = 0x0F;
+  rbt.insert(&ranges, 0x60, r);
+  r = (Range *) malloc(sizeof(Range));
+  r->min = 0x00;
+  r->max = 0x0A;
+  rbt.insert(&ranges, 0x70, r);
   dictionary = rtree.create();
   fpLog = fopen("glex.log", "w");
   if(!fpLog){
-    printf("Unable to open glex.log");
-  } /*
+    //char message[] = "Unable to open file: ";
+    //error("glxparser", "init", strcat(message, name));
+    error("glxparser", "init", "Unable to open file: glex.log");
+  } 
+  /*
   // CAT does not appear here because it does not have an operator symbol
   specials = rbt.create();
   rbt.insert(&specials, OR,       NULL); 

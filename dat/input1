@@ -1,3 +1,7 @@
-(a|b)*abb
+
+expr1: hello
+expr3: world
+expr2: (a|b)*abb
+expr1: hello
 
 

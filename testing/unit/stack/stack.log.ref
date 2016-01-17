@@ -1,13 +1,13 @@
 [*] Test Name: destroy a NULL stack.
-[error]: Source: glxstack:destroy Message: An attempt was made to destroy an empty Stack.
+[error]: Source: glxstack:destroy, Message: An attempt was made to destroy an empty Stack.
 [+] Ok.
 [*] Test Name: peek NULL stack.
-[error]: Source: glxstack:peek Message: An attempt was made to peek() an empty Stack.
+[error]: Source: glxstack:peek, Message: An attempt was made to peek() an empty Stack.
 [+] Ok.
 [*] Test Name: destroy a stack with 1 element.
 [+] Ok.
 [*] Test Name: try to destroy the stack again.
-[error]: Source: glxstack:destroy Message: An attempt was made to destroy an empty Stack.
+[error]: Source: glxstack:destroy, Message: An attempt was made to destroy an empty Stack.
 [+] Ok.
 [*] Test Name: Push [0, 9] integers.
 [+] Ok.
@@ -18,9 +18,9 @@
 [*] Test Name: pop all integers.
 [+] Ok.
 [*] Test Name: Pop an empty stack.
-[error]: Source: glxstack:pop Message: An attempt was made to pop() an empty Stack.
+[error]: Source: glxstack:pop, Message: An attempt was made to pop() an empty Stack.
 [+] Ok.
 [*] Test Name: Peek an empty stack.
-[error]: Source: glxstack:peek Message: An attempt was made to peek() an empty Stack.
+[error]: Source: glxstack:peek, Message: An attempt was made to peek() an empty Stack.
 [+] Ok.
 [*] Unit test for glxstack is done!

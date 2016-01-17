@@ -1,19 +1,19 @@
 [*] Test: destroy a NULL red black tree.
 [+] Ok.
 [*] Test: search key in NULL red black tree.
-[error]: Source: glxrbtree:containsKey Message: An attempt was made to search in a NULL RBT.
+[error]: Source: glxrbtree:containsKey, Message: An attempt was made to search in a NULL RBT.
 [+] Ok.
 [*] Test: find min-key element in NULL red black tree.
-[error]: Source: glxrbtree:findMin Message: An attempt was made to search in a NULL RBT.
+[error]: Source: glxrbtree:findMin, Message: An attempt was made to search in a NULL RBT.
 [+] Ok.
 [*] Test: dump NULL red black tree with NULL file pointer.
-[error]: Source: glxrbtree:dump Message: An attempt was made to write in a NULL file pointer.
+[error]: Source: glxrbtree:dump, Message: An attempt was made to write in a NULL file pointer.
 [+] Ok.
 [*] Test: dump NULL red black tree to stdout.
 EMPTY RBT
 [+] Ok.
 [*] Test: join two NULL red black trees.
-[error]: Source: glxrbtree:join Message: An attempt was made to use NULL RBT.
+[error]: Source: glxrbtree:join, Message: An attempt was made to use NULL RBT.
 [+] Ok.
 [*] Test: create red black tree.
 [+] Ok.

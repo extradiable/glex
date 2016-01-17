@@ -16,7 +16,7 @@ static Queue *createQueue() {
     Q->last = NULL;
     Q->size = 0;
   } else {
-      error("glxqueue", "createQueue", "Unable to create Queue");
+      err.show("glxqueue", "createQueue", "Unable to create Queue");
   }
   return Q;
 }
@@ -27,7 +27,7 @@ static Item *createItem(void *data) {
     I->data = data;
     I->next = NULL;
   } else {
-      error("glxqueue", "createItem", "Unable to create Item");
+      err.show("glxqueue", "createItem", "Unable to create Item");
   }
   return I;
 }
@@ -59,7 +59,7 @@ static void *peek(Queue *Q) {
   if (Q != NULL && Q->size) {
     return Q->first->data;
   } else {
-   error("glxqueue", "peek", "An attempt was made to peek() an empty Queue");
+   err.show("glxqueue", "peek", "An attempt was made to peek() an empty Queue");
   }
   return NULL;
 }
@@ -76,7 +76,7 @@ static void destroy(Queue **pQ, void (* destroyfn) (void *data)) {
     free(Q);
     *pQ = NULL;
   } else {
-    error("glxqueue", "destroyQueue", "An attempt was made to destroy an empty Queue");
+    err.show("glxqueue", "destroyQueue", "An attempt was made to destroy an empty Queue");
   }
 }
 
