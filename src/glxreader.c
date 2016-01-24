@@ -48,12 +48,12 @@ uint16_t limit = 0;
 /* Reads from file and stores in Buffer*/
 void loadBuffer(void);
 
-static void initLexer(uint8_t *name){
+static void initLexer(uint8_t *name) {
   pos = 0;
   limit = 0;
   buffer[0] = '\0';
   fp = fopen(name, "r");
-  if(fp == NULL){
+  if(fp == NULL) {
     char message[] = "Unable to open file: ";
     error("glxreader", "init", strcat(message, name));
   }
@@ -63,7 +63,7 @@ static void initLexer(uint8_t *name){
   #endif
 }
 
-void loadBuffer(void){
+void loadBuffer(void) {
   pos = pos % (2 * HALF_BUFF_LEN);
   limit = fread(
     &buffer[pos], 
@@ -75,11 +75,11 @@ void loadBuffer(void){
   pos = pos + (pos == limit);
 }
 
-static uint8_t hasNextByte(){
+static uint8_t hasNextByte() {
   return pos < limit;
 }
 
-static int8_t getLine(void){
+static int8_t getLine(void) {
   return currentLine;
 }
 static uint8_t readByte(void) {
@@ -91,7 +91,7 @@ static uint8_t readByte(void) {
   return buffer[pos++];  
 }
 
-static void freeLexer(){
+static void freeLexer() {
   fclose(fp);
 }
 

@@ -42,6 +42,9 @@ typedef struct {
   /* returns element without pop it */
   void * (* peek) (Stack *S);
 
+  /* prints the content of the stack */
+  void (* print) (FILE *fp, Stack *S, void (* printfn) (FILE *fp, void *data));
+
   /* Clear the stack and then free it */
   void (* destroy) (Stack **S, void (* destroyfn) (void *data));
 

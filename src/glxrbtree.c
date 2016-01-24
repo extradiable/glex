@@ -25,7 +25,7 @@
 
 static RBT sentinel;
 
-static int isEmpty(RBT *T){
+static int isEmpty(RBT *T) {
   if (T != NULL) {
     return T == &sentinel;
   } else {
@@ -33,13 +33,13 @@ static int isEmpty(RBT *T){
   }  
 } 
 
-static RBT *create(void){
+static RBT *create(void) {
   return &sentinel;
 }
 
-static RBT *createNode(uint16_t key, void *data){
+static RBT *createNode(uint16_t key, void *data) {
   RBT *N = (RBT *) malloc(sizeof(RBT));
-  if(N){
+  if(N) {
     N->color = RED;
     N->key = key;
     N->data = data;
@@ -51,14 +51,14 @@ static RBT *createNode(uint16_t key, void *data){
   return N;
 }
 
-static void *left_rotate(RBT **T, RBT *x){
+static void *left_rotate(RBT **T, RBT *x) {
   RBT *y = x->right;
   x->right = y->left;
   y->left->parent = x;
   y->parent = x->parent;
-  if(x->parent == &sentinel){
+  if(x->parent == &sentinel) {
     *T = y;
-  }else if(x == x->parent->left){
+  }else if(x == x->parent->left) {
     x->parent->left = y;
   }else{
     x->parent->right = y;
@@ -67,14 +67,14 @@ static void *left_rotate(RBT **T, RBT *x){
   x->parent = y;
 }
 
-static void *right_rotate(RBT **T, RBT *y){
+static void *right_rotate(RBT **T, RBT *y) {
   RBT *x = y->left;
   y->left = x->right;
   x->right->parent = y;
   x->parent = y->parent;
-  if(y->parent == &sentinel){
+  if(y->parent == &sentinel) {
     *T = x;
-  }else if(y == y->parent->left){
+  }else if(y == y->parent->left) {
     y->parent->left = x;
   }else{
     y->parent->right = x;
@@ -83,9 +83,9 @@ static void *right_rotate(RBT **T, RBT *y){
   y->parent = x;
 }
 
-static void fix_linked_list(RBT **T, RBT *z){
-  if(z != *T){
-    if(z->parent->left == z){
+static void fix_linked_list(RBT **T, RBT *z) {
+  if(z != *T) {
+    if(z->parent->left == z) {
       z->parent->prev->next = z;
       z->prev = z->parent->prev;
       z->next = z->parent;
@@ -99,17 +99,17 @@ static void fix_linked_list(RBT **T, RBT *z){
   }
 }
 
-static void insert_fixup(RBT **T, RBT *z){ 
-  while(z->parent->color == RED){
-    if(z->parent == z->parent->parent->left){
+static void insert_fixup(RBT **T, RBT *z) { 
+  while(z->parent->color == RED) {
+    if(z->parent == z->parent->parent->left) {
       RBT *y = z->parent->parent->right;
-      if(y->color == RED){
+      if(y->color == RED) {
         z->parent->color = BLACK;
         y->color = BLACK;
         z->parent->parent->color = RED;
         z = z->parent->parent;
       }else{
-        if(z == z->parent->right){
+        if(z == z->parent->right) {
           z = z->parent;
           left_rotate(T, z);
         }
@@ -119,13 +119,13 @@ static void insert_fixup(RBT **T, RBT *z){
       }
     }else{
       RBT *y = z->parent->parent->left;
-      if(y->color == RED){
+      if(y->color == RED) {
         z->parent->color = BLACK;
         y->color = BLACK;
         z->parent->parent->color = RED;
         z = z->parent->parent;
       }else{
-        if(z == z->parent->left){
+        if(z == z->parent->left) {
           z = z->parent;
           right_rotate(T, z); 
         }
@@ -138,14 +138,14 @@ static void insert_fixup(RBT **T, RBT *z){
   (*T)->color = BLACK;
 }
 
-static RBT *insert(RBT **T, uint16_t key, void *data){
+static RBT *insert(RBT **T, uint16_t key, void *data) {
   RBT *y = &sentinel; 
   RBT *x = *T;
-  while(x != &sentinel){
+  while(x != &sentinel) {
     y = x;
-    if(key < x->key){
+    if(key < x->key) {
       x = x->left;
-    }else if(key > x->key){
+    }else if(key > x->key) {
       x = x->right;
     }else{
       //duplicates are not admited
@@ -154,9 +154,9 @@ static RBT *insert(RBT **T, uint16_t key, void *data){
   }
   RBT *z = createNode(key, data);
   z->parent = y;
-  if(y == &sentinel){
+  if(y == &sentinel) {
     *T = z;
-  }else if(key < y->key){
+  }else if(key < y->key) {
     y->left = z;
   }else{
     y->right = z;
@@ -170,7 +170,7 @@ static RBT *insert(RBT **T, uint16_t key, void *data){
 /**
  * This function inserts all keys whithin F into T
  */
-static void join(RBT **T, RBT *F){
+static void join(RBT **T, RBT *F) {
   if(T != NULL && *T != NULL) {
     if (F != &sentinel) {
       RBT *N = F;
@@ -187,20 +187,20 @@ static void join(RBT **T, RBT *F){
 /*
  * A convenient function for output the content of the tree
  */
-static void dump(RBT *T, FILE *fp) {
+static void print(FILE *fp, RBT *T) {
   if (!isEmpty(T)) {
-    dump(T->left, fp);
+    print(fp, T->left);
     fprintf(fp, "(key: %d, value: %p) ", T->key, T->data);
-    dump(T->right, fp);
+    print(fp, T->right);
   }
 }
 
-static void _dump(RBT *T, FILE *fp) {
+static void _print(FILE *fp, RBT *T) {
   if (fp != NULL) {
     if (isEmpty(T)) {
-      fprintf(fp, "EMPTY RBT\n");
+      fprintf(fp, "EMPTY RBT");
     } else {
-      dump(T, fp);
+      print(fp, T);
       fprintf(fp, "\n");
     } 
   } else {
@@ -208,7 +208,7 @@ static void _dump(RBT *T, FILE *fp) {
   }
 }
 
-static char containsKey(RBT *T, uint16_t key){
+static char containsKey(RBT *T, uint16_t key) {
   if (T != NULL) {
     if (T!=&sentinel) {
       if (key > T->key) {
@@ -225,7 +225,7 @@ static char containsKey(RBT *T, uint16_t key){
   }
 }
 
-static RBT *get(RBT *T, uint16_t key){
+static RBT *get(RBT *T, uint16_t key) {
   if (T != NULL) {
     if (T!=&sentinel) {
       if (key == T->key) {
@@ -258,7 +258,7 @@ static void destroy(RBT **pT, void (* destroyfn) (void *data)) {
   }
 }
 
-static RBT *findMin(RBT *T){
+static RBT *findMin(RBT *T) {
   if (T != NULL) {
     while(1) {
       if (isEmpty(T->left)) {
@@ -277,7 +277,7 @@ rbt_lib const rbt = {
   create,
   isEmpty,
   insert,
-  _dump,
+  _print,
   join,
   containsKey,
   get,

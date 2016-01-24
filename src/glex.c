@@ -75,7 +75,7 @@ static char doc[] =
 */
 static struct argp argp = {options, parse_opt, args_doc, doc};
 
-void usage(void){
+void usage(void) {
   
   printf("GLEX - DFA Generator beta (2015 Oct 31)\n");
   printf("usage: glex <file>    parse specified file\n");
@@ -102,7 +102,7 @@ err_lib const err = {
 };
 
 #ifndef UNIT_TESTING_H
-int main(int argc, char **argv){
+int main(int argc, char **argv) {
   Config config;
   argp_parse (&argp, argc, argv, 0, 0, &config);
   makeAutomaton(&config);

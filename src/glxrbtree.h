@@ -41,7 +41,7 @@ typedef struct {
   RBT * (* insert) (RBT **T, uint16_t key, void *data);
   
   /** Convenient function for output the content of the tree  */
-  void (* dump) (RBT *T, FILE *fp);
+  void (* print) (FILE *fp, RBT *T);
   
   /** Inserts all keys from F to T*/
   void (* join) (RBT **T, RBT *F);

@@ -19,6 +19,7 @@
 #include "glxreader.h"
 #include "glxrtree.h"
 #include "glxstack.h"
+#include "glxptnode.h"
 #include "glxparsetree.h"
 
 /** SECTION: DEFINE */
@@ -41,6 +42,24 @@
 #define READ_EXPRNAME_ERR_1 0
 #define READ_EXPRNAME_ERR_2 1
 #define READ_EXPRNAME_ERR_3 2
+#define OPEN_LOG_ERR        3
+#define READ_EXPR_ERR_1     4
+
+// Special tokens
+#define AUGMENTED   '#'
+#define SYM         'S'
+
+// Tokens for specials
+#define BRANCH     '|'
+#define CONCAT     '.'
+#define ATOM       'a'
+#define STAR       '*'
+#define PLUS       '+'
+#define OPTIONAL   '?'
+#define START_EXPR '('
+#define END_EXPR    ')'
+#define END        '\0'
+#define EOL        '\n'
 
 /** SECTION: GLOBALS */
 
@@ -48,6 +67,9 @@ typedef struct {
   char min;
   char max;
 } Range;
+
+/* Parse tree */
+Stack *parseTree = NULL;
 
 /* Current character being analized */
 uint8_t ascii = '\0';
@@ -117,32 +139,41 @@ RBT *ranges = NULL;
 void readExpressionName(void);
 
 /* Initialization */
-void init(void);
+void init(Config *);
+
+/* Syntax tree */
+
+PTNode *token(int8_t);
+void concat(void);
+void branch(void);
+void clousure(void);
+void atom(void);
 
 /** SECTION: LOGIC */
 
-PTNode *parse(uint8_t *fileName){
-  Stack *tree = stack.create();
-  PTNode *T = NULL;
+PTNode *parse(uint8_t *fileName) {
+  parseTree = stack.create();
   reader.init(fileName);
   do {
     consumeAllSpaces()
     readExpressionName();
+    ascii = reader.readByte();
+    consumeLineSpaces();
+    branch();
     while(reader.hasNextByte()) {
       ascii = reader.readByte();      
       if(ascii == '\n')
         break;
     }
-    // TODO: implement re() using a stack
     consumeAllSpaces()
   } while(reader.hasNextByte());
 
   //TODO: fix this function by adding the call to re()
   /*
-  while((current = reader.readByte()) != '\0'){
-    if(!containsKeyRBT(whitespaces, current)){
-      if(T){
-        T = join(T, &re, OR);
+  while((current = reader.readByte()) != '\0') {
+    if(!containsKeyRBT(whitespaces, current)) {
+      if(T) {
+        T = join(T, &re, BRANCH);
       }else{
         T = re();
       }
@@ -150,7 +181,7 @@ PTNode *parse(uint8_t *fileName){
   }
   // we are done with the reader
   freeBuffer();
-  if(current == '\0'){
+  if(current == '\0') {
     PTNode *R =  createPTNode(CAT, CAT, 0);
     R->left = T;
     R->right = createPTNode(AUGMENTED, AUGMENTED, 0);
@@ -170,7 +201,7 @@ int8_t valid() {
   RBT *T = rbt.get(ranges, hnibble);
   if (T != NULL) {
     Range *r = T->data;
-    if (lnibble >= r->min && lnibble <= r->max){
+    if (lnibble >= r->min && lnibble <= r->max) {
       return 1;
     } else {
       return ascii == '_';
@@ -194,6 +225,14 @@ void showError(int8_t code) {
     case READ_EXPRNAME_ERR_3:
       sprintf(msg, "Duplicated name found '%s'. Line: %d", currentName, line);
       err.show("glxparser", "readExpressionName", msg);
+      break;
+    case OPEN_LOG_ERR:
+      sprintf(msg, "Unable to open file: glex.log");
+      err.show("glxparser", "init", msg);
+      break;
+    case READ_EXPR_ERR_1:
+      sprintf(msg, "Expected ')' but found '%c'. Line: %d", ascii, line);
+      err.show("glxparser", "atom", msg);
       break;
   }
 }
@@ -228,7 +267,7 @@ void readExpressionName() {
   }
 }
 
-void init(){
+void init(Config *config) {
   currentName = malloc((MAX_EXPNAME_LENGTH + 1) * sizeof(uint8_t));
   ranges = rbt.create();
   // number ranges
@@ -255,27 +294,28 @@ void init(){
   r->max = 0x0A;
   rbt.insert(&ranges, 0x70, r);
   dictionary = rtree.create();
-  fpLog = fopen("glex.log", "w");
-  if(!fpLog){
-    //char message[] = "Unable to open file: ";
-    //error("glxparser", "init", strcat(message, name));
-    error("glxparser", "init", "Unable to open file: glex.log");
-  } 
+  if(config->verbose) { 
+    fpLog = fopen("glex.log", "w");
+    if(!fpLog) {
+      showError(OPEN_LOG_ERR);
+    } 
+  }
+  specials = rbt.create();
+  rbt.insert(&specials, BRANCH,   NULL); 
+  rbt.insert(&specials, OPTIONAL, NULL); 
+  rbt.insert(&specials, STAR,     NULL); 
+  rbt.insert(&specials, END_EXPR, NULL); 
+  rbt.insert(&specials, EOL, NULL); 
   /*
   // CAT does not appear here because it does not have an operator symbol
-  specials = rbt.create();
-  rbt.insert(&specials, OR,       NULL); 
-  rbt.insert(&specials, STAR,     NULL); 
   rbt.insert&specials, PLUS,     NULL); 
-  rbt.insert(&specials, OPTIONAL, NULL); 
-  //rbt.insert(&specials, O_GROUP,  NULL); 
-  rbt.insert(&specials, C_GROUP,  NULL); 
+  //rbt.insert(&specials, START_EXPR,  NULL); 
   rbt.insert&specials, END,      NULL); 
   rbt.insert(&specials, EOL,      NULL); 
   symbols = rbt.create();
 
   info = (ParseInfo *) malloc(sizeof(ParseInfo));
-  if(info){
+  if(info) {
     info->numStates = 0;
     info->numSymbols = 0;
     info->finalState = 0;
@@ -329,15 +369,6 @@ void init(){
 
 void dumpFP(RBT **followpos, uint8_t *positionToSymbol, int16_t size);
 
-/* Syntax tree */
-
-PTNode *cat(void);
-PTNode *or(void);
-PTNode *re(void);
-PTNode *star(void);
-PTNode *sym(void);
-PTNode *createSymbol(void);
-PTNode *join(PTNode *left, PTNode *(*fn)(void), int8_t operand);
 
 /* DFA Generation */
 
@@ -360,94 +391,68 @@ void makeAutomaton(Config *config);
 
 /** SECTION: CONSTANTS */
 
-// Special tokens
-#define AUGMENTED   '#'
-#define SYM         'S'
-
-// Tokens for specials
-#define OR          '|'
-#define CAT         '.'
-#define STAR        '*'
-#define PLUS        '+'
-#define OPTIONAL    '?'
-#define O_GROUP     '('
-#define C_GROUP     ')'
-#define END         '\0'
-#define EOL         '\n'
-
-
-//TODO: ptnode is no longer a tree but a stack of nodes
-PTNode *join(PTNode *left, PTNode *(*fn)(void), int8_t operand){
-  /*
-  PTNode *right = NULL, *root = NULL;
-  if(fn){
-    right = (*fn)();
+PTNode *token(int8_t type) {
+  PTNode *N = ptn.create(type, ascii, 0);
+  switch(type){
+    case CONCAT:
+      N->lexeme = '.';
+      break;
+    case BRANCH:
+      N->lexeme = '|';
+      break;
   }
-  root = createPTNode(operand, operand, 0);
-  root->left = left;
-  root->right = right;
-  return root;
-  */
+  return N;
 }
 
-PTNode *re(){
-  return or();
+void branch() {
+  concat();
+  while(ascii == BRANCH) {
+    stack.push(parseTree, token(BRANCH));
+    concat();
+  }
 }
 
-PTNode *or(){
-  PTNode *t = cat();
-  while(current == OR){
-    current = reader.readByte();
-    t = join(t, &cat, OR);
+void concat() {
+  clousure();
+  while(!rbt.containsKey(specials, current)) { // no special meaning for current
+    stack.push(parseTree, token(CONCAT));
+    exit(1); //TODO: remove this
+    clousure();
   }
-  return t;
 }
 
-PTNode *cat(){
-  PTNode *t = star();
-  while(!rbt.containsKey(specials, current)){ // no special meaning for current
-    t = join(t, &star, CAT);
+void clousure() {
+  atom();
+  while(ascii == STAR || ascii == PLUS || ascii == OPTIONAL) { //TODO: check optional case
+    stack.push(parseTree, token(ascii));
   }
-  return t;
 }
 
-PTNode *star(){
-  PTNode *t = sym();
-  if(current == STAR){
-    t = join(t, NULL, STAR);  
-  }
-  while(current == STAR){
-    current = reader.readByte();
-  }
-  return t;
-}
-
-PTNode *sym(){
-  PTNode *t;
-  if(current == O_GROUP){ 
-    current = reader.readByte();
-    t = re();
-    if(current == C_GROUP){
-      current = reader.readByte();
-    }else{
-      fprintf(stderr, "Unexpected end of input. ')' is missing.");
-      exit(EXIT_FAILURE);
+void atom() {
+  if(ascii == START_EXPR) { 
+    ascii = reader.readByte();
+    branch();
+    if(ascii != END_EXPR) {
+      showError(READ_EXPR_ERR_1);
     }
-  }else if(current == '\\'){
-    t = NULL;
+    ascii = reader.readByte();
   }else{
-    t = createSymbol();
-    current = reader.readByte();
+    //handle scape
+    if(ascii == '\\') {
+    
+    }
+    stack.push(parseTree, token(ATOM));
+    stack.print(stdout, parseTree, (void (*) (FILE *, void *)) ptn.print);
+    ascii = reader.readByte();
   }
-  return t;
 }
 
-PTNode *createSymbol(void){
-  uint8_t *s = malloc(sizeof(uint8_t));
+PTNode *createSymbol(void) {
+  /*uint8_t *s = malloc(sizeof(uint8_t));
   *s = 0; // try to insert symbol for first time
-  if(s != NULL){
+  if(s != NULL) {
     RBT *N = rbt.insert(&symbols, current, s); 
-    if(s == N->data){ // new symbol
+    if(s == N->data) { // new symbol
       *s = info->numSymbols++;
     }
     s = N->data; // retrieve the actual state of the symbol
@@ -456,18 +461,18 @@ PTNode *createSymbol(void){
   }else{
     fprintf(stderr, "Insufficient memory to create symbol.");
     exit(EXIT_FAILURE);
-  }
+  }*/
 }
 
-void preprocessSyntaxTree(PTNode *T){
+void preprocessSyntaxTree(PTNode *T) {
   //TODO: ptnode is no longer a tree but a stack of nodes
   /*PTNode *L = T->left;
   PTNode *R = T->right;
-  switch(T->token){
+  switch(T->token) {
     case AUGMENTED:
     case SYM:
       T->leaf = numPositions++;
-      if(T->lexeme == '\0'){ // Probably need to change this
+      if(T->lexeme == '\0') { // Probably need to change this
         T->nullable = 1;
       }else{
         T->nullable = 0;
@@ -484,13 +489,13 @@ void preprocessSyntaxTree(PTNode *T){
       break;
     case CAT:
       T->nullable = L->nullable && R->nullable;
-      if(L->nullable){
+      if(L->nullable) {
         joinRBT(&T->firstpos, L->firstpos);
         joinRBT(&T->firstpos, R->firstpos);
       }else{
         joinRBT(&T->firstpos, L->firstpos);
       }
-      if(R->nullable){
+      if(R->nullable) {
         joinRBT(&T->lastpos, L->lastpos);
         joinRBT(&T->lastpos, R->lastpos);
       }else{
@@ -509,7 +514,7 @@ void preprocessSyntaxTree(PTNode *T){
   }*/
 }
 
-void computeAuxiliaryFunctions(PTNode *T){
+void computeAuxiliaryFunctions(PTNode *T) {
   // at this point symbols contains the list of all necessary symbols for FDA
   // lets create the alphabet for ParseInfo Structure
   info->alphabet  = (uint8_t *) malloc(info->numSymbols * sizeof(uint8_t));
@@ -526,18 +531,18 @@ void computeAuxiliaryFunctions(PTNode *T){
   positionToSymbol = (uint8_t *) malloc(numPositions * sizeof(uint8_t)); 
 }
 
-void computeFollowPos(PTNode *T){
+void computeFollowPos(PTNode *T) {
   //TODO: ptnode is no longer a tree but a stack of nodes
   /*
   // Take advantage of the walk to initialize the array with the leafs
-  if(T->leaf > -1){
+  if(T->leaf > -1) {
     *(followpos + T->leaf) = rbt.create();
     // recall T->symbol is not the actual symbol but a reduced set
     // actual symbol read is in T->lexeme
     *(positionToSymbol + T->leaf) = T->symbol; 
   }
   RBT *r, *s, *ri;
-  if(T->token == STAR){
+  if(T->token == STAR) {
     r = T->lastpos;
     s = T->firstpos;
     ri = r;
@@ -546,7 +551,7 @@ void computeFollowPos(PTNode *T){
       ri = ri->next;
     }while(ri != r);
 
-  }else if(T->token == CAT){
+  }else if(T->token == CAT) {
     r = T->left->lastpos;
     s = T->right->firstpos;
     ri = r;
@@ -557,8 +562,8 @@ void computeFollowPos(PTNode *T){
   }*/
 }
 
-int count(RBT *T){
-  if(!rbt.isEmpty(T)){
+int count(RBT *T) {
+  if(!rbt.isEmpty(T)) {
   RBT *c = T;
   int count = 0;
   do{
@@ -569,7 +574,7 @@ int count(RBT *T){
   }return 0;
 }
 
-void generateStates(RBT *firstState){
+void generateStates(RBT *firstState) {
   /*TODO: needs several revisions
   // info->transitions are actual transitions from the automaton.
   info->transitions = stack.create();
@@ -579,7 +584,7 @@ void generateStates(RBT *firstState){
   // transitions[x] (which is a set of positions) 
   RBT **transitions = (RBT **) malloc(info->numSymbols * sizeof(RBT));
   uint16_t i;
-  for(i = 0; i < info->numSymbols; i++){
+  for(i = 0; i < info->numSymbols; i++) {
     *(transitions + i) = rbt.create();
   }
   RBT *states = rbt.create();
@@ -595,9 +600,9 @@ void generateStates(RBT *firstState){
     do {
       int16_t p = current->key;
       // this check is necessary, followpos(p) can be empty
-      if(!isEmptyRBT(followpos[p - 1])){
+      if(!isEmptyRBT(followpos[p - 1])) {
         uint8_t symbol = positionToSymbol[p - 1];
-        if(isEmptyRBT(*(transitions + symbol))){
+        if(isEmptyRBT(*(transitions + symbol))) {
           uint8_t *s = malloc(sizeof(SYM));
           *s = symbol;
           push(symbols, s); 
@@ -608,11 +613,11 @@ void generateStates(RBT *firstState){
     } while(current != set->positions);
     //freeRBT(set->positions); // we migth free this now
     // We need to search for new states
-    while(symbols->size > 0){
+    while(symbols->size > 0) {
       uint8_t *symbol = stack.pop(symbols);
       RBT *candidate = *(transitions + *symbol);
       State *new = insertState(&states, candidate, numPositions);
-      if(found){ // A new state was found!
+      if(found) { // A new state was found!
         push(newStates, new);
       }
       fprintf(fpLog, "(%d%c, %c, %d%c)\n", set->id, set->isFinal?'f':'q', info->alphabet[*symbol], new->id, new->isFinal?'f':'q');
@@ -630,9 +635,9 @@ void generateStates(RBT *firstState){
   destroyStack(newStates);*/
 }
 
-void makeAutomaton(Config *config){
+void makeAutomaton(Config *config) {
   // 0. Initialize necessary structures. 
-  init();
+  init(config);
   // 1. Build syntax tree for augmented regular expression (r)#
   PTNode *T = parse(config->input);  /*
   // 2. Compute auxiliary functions nullable, firstpos and lastpos 
@@ -651,9 +656,9 @@ void makeAutomaton(Config *config){
   printf("FDA construction completed.\n"); */
 }
 
-Transition *createTransition(int16_t currentState, uint8_t symbol, int16_t nextState){
+Transition *createTransition(int16_t currentState, uint8_t symbol, int16_t nextState) {
   Transition *T = (Transition *) malloc(sizeof(Transition));
-  if(T){
+  if(T) {
     T->currentState = currentState;
     T->symbol = symbol;
     T->nextState = nextState;
@@ -664,11 +669,11 @@ Transition *createTransition(int16_t currentState, uint8_t symbol, int16_t nextS
   return T;
 }
 
-void dumpFP(RBT **followpos, uint8_t *positionToSymbol, int16_t size){
-  if(fpLog){
+void dumpFP(RBT **followpos, uint8_t *positionToSymbol, int16_t size) {
+  if(fpLog) {
     fprintf(fpLog, "\nDumping followpos information\n\n");
     uint16_t i;
-    for(i = 0; i < size; i++){
+    for(i = 0; i < size; i++) {
       fprintf(fpLog, "Leaf[%d] = %c\n", i + 1, info->alphabet[positionToSymbol[i]]);
       fprintf(fpLog, "FollowPos[%d]:\n", i + 1);
       //dumpRBT(fpLog, *(followpos + i));

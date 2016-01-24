@@ -80,10 +80,20 @@ static void destroy(Stack **pS, void (* destroyfn) (void *data)) {
   }
 }
 
+static void print(FILE *fp, Stack *S, void (* printfn) (FILE *fp, void *data)) {
+  Item *I = S->top;
+  while(I != NULL) { 
+    printfn(fp, I->data);
+    I = I->next;
+  }
+  printf("\n");
+}
+
 stack_lib const stack = { 
   createStack, 
   pop,
   push,
   peek,
+  print,
   destroy 
 };

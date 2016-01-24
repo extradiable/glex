@@ -14,92 +14,55 @@
 
 #include "glxptnode.h"
 
-void freePTNode(PTNode *N);
-void dumpST(FILE *fpLog, PTNode *T, int16_t *node, int16_t *leaf);
-
-PTNode *createPTNode(int8_t token, uint8_t lexeme, uint8_t symbol){
+static PTNode *create(int8_t id, uint8_t lexeme, uint8_t symbol) {
   PTNode *N = (PTNode *) malloc(sizeof(PTNode));
-  if(N != NULL){
+  if(N != NULL) {
     N->nullable = 0;
-    N->token = token;
+    N->id = id;
     N->lexeme = lexeme;
     N->symbol = symbol;
-    N->leaf = -1;
     N->firstpos = rbt.create();
     N->lastpos = rbt.create();
     //TODO: ptnode is no longer a tree but a stack
+    //N->leaf = -1;
     //N->left = NULL;
     //N->right = NULL;
-  }else{
+  }else {
     fprintf(stderr, "Insuficient memory to create PTNode");  
     exit(EXIT_SUCCESS);
   }
   return N;
 }
 
-//TODO: ptnode is no longer a tree but a stack
-/*
-void preordenPT(PTNode *T, void(*ptrF)(void *)){
-  if(T!=NULL){
-    (*ptrF)(T);
-    preordenPT(T->left, ptrF);
-    preordenPT(T->right, ptrF);
-  }
-}
-
-void inordenPT(PTNode *T, void (*ptrF)(void *)){
-  if(T!=NULL){
-    inordenPT(T->left, ptrF);
-    (*ptrF)(T);
-    inordenPT(T->right, ptrF);
-  }
-}
-
-void postordenPT(PTNode *T, void (*ptrF)(PTNode *)){
-  if(T!=NULL){
-    postordenPT(T->left, ptrF);
-    postordenPT(T->right, ptrF);
-    (*ptrF)(T);
-  }
-}
-*/
-/* Frees the allocated memory used for this node */
-void freePTNode(PTNode *T){
-  rbt.destroy(&T->firstpos, NULL);
-  rbt.destroy(&T->lastpos, NULL);
-  free(T);
-}
-
-void freePT(PTNode *T){
-  //TODO: ptnode is no longer a tree but a stack of nodes
-  //postordenPT(T, (void *) &freePTNode);
+/* Destroy this node */
+static void destroy(PTNode **ptrN) {
+  PTNode *N = *ptrN;
+  rbt.destroy(&(N->firstpos), NULL);
+  rbt.destroy(&(N->lastpos), NULL);
+  free(N);
 }
 
 //TODO: ptnode is no longer a tree but a stack
-/*
-void dumpST(FILE *fpLog, PTNode *T, int16_t *node, int16_t *leaf){
-  if(T){
-    int8_t l = T->left || T->right ? 0 : 1;
-    dumpST(fpLog, T->left, node, leaf);
-    dumpST(fpLog, T->right, node, leaf);
-    fprintf(fpLog, "[id: %d leaf: %d lexeme: %c]\n", *node, l ? *leaf : 0, T->lexeme);
-    fprintf(fpLog, "\tNullable:%d\n", T->nullable);
-    fprintf(fpLog, "\tFirstPos:[ ");
-    dumpRBT(fpLog, T->firstpos);
-    fprintf(fpLog, "]\n");
-    fprintf(fpLog, "\tLastPos:[ ");
-    dumpRBT(fpLog, T->lastpos);
-    fprintf(fpLog, "]\n");
-    *leaf = *leaf + l;
-    (*node)++;
+static void print(FILE *fp, PTNode *N) {
+  static char separator = '\0';
+  if(N) {
+    fprintf(fp, "%c{\n", separator);
+    fprintf(fp, "  id: %d\n", N->id);
+    fprintf(fp, "  lexeme: %c\n", N->lexeme);
+    fprintf(fp, "  Nullable:%d\n", N->nullable);
+    fprintf(fp, "  FirstPos:[");
+    rbt.print(fp, N->firstpos);
+    fprintf(fp, "]\n");
+    fprintf(fp, "  LastPos:[");
+    rbt.print(fp, N->lastpos);
+    fprintf(fp, "]\n");
+    fprintf(fp, "}\n");
   }
+  separator = ',';
 }
 
-void dumpSyntaxTree(FILE *fpLog, PTNode *T){
-  if(fpLog){
-    fprintf(fpLog, "\nDumping nullable, firstpos and lastpos information\n\n");
-    int16_t node = 1, leaf = 1;
-    dumpST(fpLog, T, &node, &leaf);
-  }
-}
-*/
+ptnode_lib const ptn = { 
+  create, 
+  print,
+  destroy
+};
